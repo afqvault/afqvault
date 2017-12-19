@@ -154,7 +154,7 @@ def upload_repo(username, repository_name):
         .format(username=username, repo_name=repository_name)
     subjects_csv = "{}/data/subjects.csv".format(repo)
     nodes_path = "{}/data/nodes.csv".format(repo)
-    scan_params_path = ""  # TODO: fill this in
+    scan_params_path = "{}/data/params.json".format(repo)  # TODO: fill this in
 
     try:
         df = pd.read_csv(subjects_csv, index_col=0)
@@ -166,7 +166,13 @@ def upload_repo(username, repository_name):
 
     sha = get_sha(username, repository_name)
 
-    project_info = upload_project(sha, purl=repo)
+    params = {}
+
+    r = requests.get(scan_params_path)
+    if r.status_code == 200:
+        params = r.json()
+
+    project_info = upload_project(sha, purl=repo, scan_parameters=params)
     if project_info:
         upload_subjects(df, df_node, project_info["_id"])
     print(project_info)
