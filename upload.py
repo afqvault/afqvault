@@ -4,6 +4,7 @@ import simplejson as json
 import os
 from copy import deepcopy
 import argparse
+import urllib
 
 # url_tmpl = "http://localhost/api/v1/{}"
 url_tmpl = "http://ec2-54-218-51-130.us-west-2.compute.amazonaws.com/api/v1/{}"
@@ -155,7 +156,12 @@ def upload_repo(username, repository_name):
     nodes_path = "{}/data/nodes.csv".format(repo)
     scan_params_path = ""  # TODO: fill this in
 
-    df = pd.read_csv(subjects_csv, index_col=0)
+    try:
+        df = pd.read_csv(subjects_csv, index_col=0)
+    except urllib.error.HTTPError:
+        print("Cannot find ", subjects_csv)
+        return
+
     df_node = pd.read_csv(nodes_path)
 
     sha = get_sha(username, repository_name)
